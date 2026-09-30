@@ -78,10 +78,26 @@
   h1 .name {
     display: block; font-style: italic; font-weight: 600;
     font-size: clamp(4.2rem, 13vw, 10rem);
-    background: linear-gradient(100deg, var(--rose-deep) 10%, var(--rose) 45%, #f08a5d 90%);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
     padding-bottom: .08em;
   }
+  h1 .name .ch {
+    display: inline-block; cursor: pointer;
+    animation: jelly 2.4s ease-in-out infinite; animation-delay: calc(var(--i) * .12s);
+  }
+  h1 .name .ch:nth-child(6n+1) { color: var(--rose-deep); }
+  h1 .name .ch:nth-child(6n+2) { color: var(--rose); }
+  h1 .name .ch:nth-child(6n+3) { color: #f08a5d; }
+  h1 .name .ch:nth-child(6n+4) { color: var(--gold); }
+  h1 .name .ch:nth-child(6n+5) { color: #c94fa8; }
+  h1 .name .ch:nth-child(6n+6) { color: #8a5cf6; }
+  h1 .name .ch:hover { animation: spin .6s ease-out; }
+  @keyframes jelly {
+    0%, 100% { transform: translateY(0) rotate(0) scale(1); }
+    25% { transform: translateY(-.14em) rotate(-7deg) scale(1.08, .94); }
+    50% { transform: translateY(.03em) rotate(5deg) scale(.95, 1.06); }
+    75% { transform: translateY(-.04em) rotate(-2deg); }
+  }
+  @keyframes spin { from { rotate: 0deg; } to { rotate: 360deg; } }
   h1 .rest { display: block; font-size: clamp(2rem, 5.2vw, 3.8rem); }
   h1 .love { position: relative; display: inline-block; font-style: italic; font-weight: 500; color: var(--rose); }
   h1 .love svg {
@@ -143,6 +159,54 @@
     animation: pulse 2.6s ease-in-out infinite;
   }
   @keyframes pulse { 50% { transform: rotate(12deg) scale(1.07); } }
+  .stack .sticker { cursor: pointer; }
+  .stack .sticker:hover { animation: spin .7s ease-in-out; }
+
+  /* ---------- crazy stuff ---------- */
+  .float-hearts .emo {
+    position: absolute; bottom: -60px; line-height: 1; opacity: 0;
+    animation: rise-emo linear infinite;
+  }
+  @keyframes rise-emo {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+    10%  { opacity: .55; }
+    90%  { opacity: .45; }
+    100% { transform: translateY(-115vh) rotate(-40deg); opacity: 0; }
+  }
+  .marquee-wrap {
+    position: relative; z-index: 2; overflow: hidden; pointer-events: none;
+    margin: -30px 0; padding: 30px 0;
+  }
+  .marquee {
+    overflow: hidden;
+    width: 106%; margin-left: -3%; transform: rotate(-2deg);
+    background: var(--rose); color: #fff; padding: 10px 0;
+    font-family: var(--hand); font-size: clamp(1.6rem, 3.4vw, 2.4rem); line-height: 1.2;
+    white-space: nowrap; box-shadow: var(--shadow);
+  }
+  .marquee.alt { background: var(--gold); color: var(--ink); transform: rotate(1.5deg); }
+  .marquee .track { display: flex; width: max-content; animation: marquee 24s linear infinite; }
+  .marquee.alt .track { animation-direction: reverse; }
+  .marquee .track span { padding-right: .6em; }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+  .fx { position: fixed; inset: 0; pointer-events: none; z-index: 50; overflow: hidden; }
+  .fx .bit { position: absolute; line-height: 1; will-change: transform, opacity; }
+  .t-e p { animation: jelly 2.2s ease-in-out infinite; }
+  .party-btn {
+    position: fixed; right: 16px; bottom: 16px; z-index: 60;
+    width: 64px; height: 64px; border-radius: 50%; border: 0; cursor: pointer;
+    background: var(--ink); font-size: 2rem; line-height: 1; box-shadow: var(--shadow);
+    display: grid; place-items: center;
+    animation: bob 2.2s ease-in-out infinite;
+  }
+  .party-btn[aria-pressed="true"] { background: var(--rose); animation: spin 1s linear infinite; }
+  body.party .hero, body.party section, body.party footer { animation: disco 2.5s linear infinite; }
+  @keyframes disco { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(360deg); } }
+  body.party .polaroid, body.party .tile, body.party .fam-grid figure {
+    animation: jiggle .35s ease-in-out infinite alternate !important;
+  }
+  @keyframes jiggle { from { rotate: -3deg; } to { rotate: 3deg; } }
+  body.party .marquee .track { animation-duration: 6s; }
 
   /* ---------- sections ---------- */
   section { position: relative; z-index: 1; padding: clamp(72px, 10vw, 130px) 0; }
@@ -153,7 +217,13 @@
     font-family: var(--serif); font-weight: 400; letter-spacing: -.015em; line-height: 1.05;
     font-size: clamp(2.4rem, 5.5vw, 4.2rem);
   }
-  h2 em { color: var(--rose); font-weight: 500; }
+  h2 em {
+    font-weight: 500; padding-right: .06em;
+    background: linear-gradient(90deg, var(--rose), #f08a5d, var(--gold), #c94fa8, var(--rose)) 0 0 / 200% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: shimmer 4s linear infinite;
+  }
+  @keyframes shimmer { to { background-position: -200% 0; } }
   .sec-head { text-align: center; margin-bottom: clamp(40px, 6vw, 72px); }
   .sec-head p { margin: 14px auto 0; max-width: 46ch; color: var(--ink-soft); }
 
@@ -311,7 +381,7 @@
     *, *::before, *::after { animation: none !important; transition: none !important; }
     .reveal { opacity: 1; translate: none; }
     h1 .love path { stroke-dashoffset: 0; }
-    .float-hearts { display: none; }
+    .float-hearts, .fx, .party-btn { display: none; }
   }
 </style>
 </head>
@@ -333,7 +403,7 @@
     <div>
       <span class="kicker">pro naši holčičku ♥</span>
       <h1>
-        <span class="name">Anetka</span>
+        <span class="name"><span class="ch" style="--i:0">A</span><span class="ch" style="--i:1">n</span><span class="ch" style="--i:2">e</span><span class="ch" style="--i:3">t</span><span class="ch" style="--i:4">k</span><span class="ch" style="--i:5">a</span></span>
         <span class="rest">je největší
           <span class="love">láska!
             <svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M3 14 C 50 4, 110 4, 197 12"/></svg>
@@ -352,6 +422,8 @@
     </div>
   </div>
 </header>
+
+<div class="marquee-wrap" aria-hidden="true"><div class="marquee"><div class="track"><span>Anetka ♥ největší láska ♥ naše sluníčko ☀︎ ♥ Anetka ♥ největší láska ♥ naše sluníčko ☀︎ ♥</span><span>Anetka ♥ největší láska ♥ naše sluníčko ☀︎ ♥ Anetka ♥ největší láska ♥ naše sluníčko ☀︎ ♥</span></div></div></div>
 
 <section class="quote">
   <div class="wrap reveal">
@@ -412,6 +484,8 @@
   </div>
 </section>
 
+<div class="marquee-wrap" aria-hidden="true"><div class="marquee alt"><div class="track"><span>🌻 pejsci 🐶 moře 🌊 zmrzlinka 🍦 kytky 🌸 smích 😂 láska 💖 🌻 pejsci 🐶 moře 🌊 zmrzlinka 🍦 kytky 🌸 smích 😂 láska 💖</span><span>🌻 pejsci 🐶 moře 🌊 zmrzlinka 🍦 kytky 🌸 smích 😂 láska 💖 🌻 pejsci 🐶 moře 🌊 zmrzlinka 🍦 kytky 🌸 smích 😂 láska 💖</span></div></div></div>
+
 <footer>
   <div class="wrap reveal">
     <svg class="big-heart" viewBox="0 0 32 32" aria-hidden="true"><use href="#h"/></svg>
@@ -429,11 +503,13 @@
   <button class="next" aria-label="Další">›</button>
 </dialog>
 
+<button class="party-btn" aria-pressed="false" aria-label="Párty režim" title="Párty!">🪩</button>
+
 <script>
   // floating hearts
   (() => {
     const box = document.querySelector('.float-hearts');
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 24; i++) {
       const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       s.setAttribute('viewBox', '0 0 32 32');
       s.innerHTML = '<use href="#h"/>';
@@ -443,6 +519,83 @@
         (Math.random() > .6 ? 'fill:var(--peach);' : '');
       box.appendChild(s);
     }
+    const emos = ['🌻', '🐶', '🍦', '☀️', '💖', '🦄', '🎈', '🌸', '⭐', '🍓'];
+    for (let i = 0; i < 12; i++) {
+      const e = document.createElement('span');
+      e.className = 'emo';
+      e.textContent = emos[i % emos.length];
+      e.style.cssText = `left:${Math.random()*100}%;font-size:${18 + Math.random()*22}px;` +
+        `animation-duration:${16 + Math.random()*18}s;animation-delay:${-Math.random()*34}s;`;
+      box.appendChild(e);
+    }
+  })();
+
+  // confetti, sparkle trail, party mode
+  (() => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const fx = document.createElement('div');
+    fx.className = 'fx';
+    document.body.appendChild(fx);
+    const dlg = document.querySelector('dialog.lb');
+    const bits = ['💖', '💕', '✨', '🌻', '🎉', '⭐', '🦄', '🍦', '🐶', '☀️', '🌸', '🎈'];
+    const pick = a => a[Math.random() * a.length | 0];
+
+    const burst = (x, y, n = 16) => {
+      for (let i = 0; i < n; i++) {
+        const b = document.createElement('span');
+        b.className = 'bit';
+        b.textContent = pick(bits);
+        b.style.cssText = `left:${x}px;top:${y}px;font-size:${14 + Math.random()*22}px;`;
+        fx.appendChild(b);
+        const a = Math.random() * Math.PI * 2, d = 60 + Math.random() * 170;
+        const dx = Math.cos(a) * d, dy = Math.sin(a) * d, r = Math.random() * 720 - 360;
+        b.animate([
+          { transform: 'translate(-50%,-50%) scale(.3) rotate(0deg)', opacity: 1 },
+          { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(1) rotate(${r * .6}deg)`, opacity: 1, offset: .55 },
+          { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy + 140}px)) scale(.8) rotate(${r}deg)`, opacity: 0 }
+        ], { duration: 1200 + Math.random() * 700, easing: 'cubic-bezier(.2,.8,.3,1)' }).onfinish = () => b.remove();
+      }
+    };
+
+    document.addEventListener('click', e => {
+      if (dlg.open || e.target.closest('.party-btn')) return;
+      burst(e.clientX, e.clientY);
+    });
+
+    // big hello burst from the name
+    setTimeout(() => {
+      const r = document.querySelector('h1 .name').getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top + r.height / 2, 40);
+    }, 700);
+
+    if (matchMedia('(pointer: fine)').matches) {
+      let last = 0;
+      document.addEventListener('pointermove', e => {
+        if (dlg.open || e.timeStamp - last < 45) return;
+        last = e.timeStamp;
+        const s = document.createElement('span');
+        s.className = 'bit';
+        s.textContent = pick(['✨', '💖', '⭐', '💕']);
+        s.style.cssText = `left:${e.clientX}px;top:${e.clientY}px;font-size:${10 + Math.random()*10}px;`;
+        fx.appendChild(s);
+        s.animate([
+          { transform: 'translate(-50%,-50%) scale(1)', opacity: .9 },
+          { transform: `translate(calc(-50% + ${Math.random()*30 - 15}px), calc(-50% + 40px)) scale(.3)`, opacity: 0 }
+        ], { duration: 800, easing: 'ease-out' }).onfinish = () => s.remove();
+      });
+    }
+
+    const btn = document.querySelector('.party-btn');
+    let timer = null;
+    btn.addEventListener('click', () => {
+      const on = document.body.classList.toggle('party');
+      btn.setAttribute('aria-pressed', on);
+      clearInterval(timer);
+      if (on) {
+        burst(innerWidth / 2, innerHeight / 2, 60);
+        timer = setInterval(() => burst(Math.random() * innerWidth, Math.random() * innerHeight * .8, 12), 450);
+      }
+    });
   })();
 
   // reveal on scroll

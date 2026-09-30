@@ -208,6 +208,22 @@
   @keyframes jiggle { from { rotate: -3deg; } to { rotate: 3deg; } }
   body.party .marquee .track { animation-duration: 6s; }
 
+  /* ---------- winter ---------- */
+  .snow { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 40; }
+  body.no-snow .snow { display: none; }
+  .marquee, .marquee.alt { /* snow resting on the ribbons */
+    background-image: radial-gradient(circle at 50% -2px, #fff 9px, transparent 10px);
+    background-size: 22px 11px; background-repeat: repeat-x;
+  }
+  .snow-btn {
+    position: fixed; right: 16px; bottom: 92px; z-index: 60;
+    width: 52px; height: 52px; border-radius: 50%; border: 0; cursor: pointer;
+    background: #dbe9f6; font-size: 1.6rem; line-height: 1; box-shadow: var(--shadow);
+    display: grid; place-items: center; transition: opacity .3s, transform .3s;
+  }
+  .snow-btn:hover { transform: rotate(60deg); }
+  .snow-btn[aria-pressed="false"] { opacity: .55; filter: grayscale(1); }
+
   /* ---------- sections ---------- */
   section { position: relative; z-index: 1; padding: clamp(72px, 10vw, 130px) 0; }
   .eyebrow {
@@ -381,7 +397,7 @@
     *, *::before, *::after { animation: none !important; transition: none !important; }
     .reveal { opacity: 1; translate: none; }
     h1 .love path { stroke-dashoffset: 0; }
-    .float-hearts, .fx, .party-btn { display: none; }
+    .float-hearts, .fx, .party-btn, .snow, .snow-btn { display: none; }
   }
 </style>
 </head>
@@ -503,6 +519,7 @@
   <button class="next" aria-label="Další">›</button>
 </dialog>
 
+<button class="snow-btn" aria-pressed="true" aria-label="Sněžení" title="Sněží!">❄️</button>
 <button class="party-btn" aria-pressed="false" aria-label="Párty režim" title="Párty!">🪩</button>
 
 <script>
@@ -519,7 +536,7 @@
         (Math.random() > .6 ? 'fill:var(--peach);' : '');
       box.appendChild(s);
     }
-    const emos = ['🌻', '🐶', '🍦', '☀️', '💖', '🦄', '🎈', '🌸', '⭐', '🍓'];
+    const emos = ['🌻', '🐶', '⛄', '☀️', '💖', '🦄', '❄️', '🌸', '⭐', '🧣'];
     for (let i = 0; i < 12; i++) {
       const e = document.createElement('span');
       e.className = 'emo';
@@ -537,7 +554,7 @@
     fx.className = 'fx';
     document.body.appendChild(fx);
     const dlg = document.querySelector('dialog.lb');
-    const bits = ['💖', '💕', '✨', '🌻', '🎉', '⭐', '🦄', '🍦', '🐶', '☀️', '🌸', '🎈'];
+    const bits = ['💖', '💕', '✨', '🌻', '🎉', '⭐', '🦄', '❄️', '🐶', '⛄', '🌸', '🎈'];
     const pick = a => a[Math.random() * a.length | 0];
 
     const burst = (x, y, n = 16) => {
@@ -596,6 +613,106 @@
         timer = setInterval(() => burst(Math.random() * innerWidth, Math.random() * innerHeight * .8, 12), 450);
       }
     });
+  })();
+
+  // snow
+  (() => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const cv = document.createElement('canvas');
+    cv.className = 'snow';
+    cv.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(cv);
+    const ctx = cv.getContext('2d');
+
+    // pre-rendered sprites: a soft dot and a six-armed crystal, both with a cool halo
+    // so they stay visible on the cream sections as well as the dark ones
+    const sprite = draw => {
+      const c = document.createElement('canvas');
+      c.width = c.height = 64;
+      const g = c.getContext('2d');
+      g.translate(32, 32);
+      g.shadowColor = 'rgba(90,130,180,.55)'; g.shadowBlur = 8;
+      g.fillStyle = g.strokeStyle = '#fff';
+      draw(g);
+      return c;
+    };
+    const dot = sprite(g => { g.beginPath(); g.arc(0, 0, 14, 0, Math.PI * 2); g.fill(); });
+    const crystal = sprite(g => {
+      g.lineWidth = 3.5; g.lineCap = 'round';
+      for (let i = 0; i < 6; i++) {
+        g.beginPath();
+        g.moveTo(0, 0); g.lineTo(0, -22);
+        g.moveTo(0, -12); g.lineTo(-7, -18);
+        g.moveTo(0, -12); g.lineTo(7, -18);
+        g.stroke();
+        g.rotate(Math.PI / 3);
+      }
+    });
+
+    let w, h, flakes = [];
+    const make = top => {
+      const big = Math.random() < .12;
+      const z = .3 + Math.random() * .7; // depth: nearer flakes are bigger and faster
+      return {
+        x: Math.random() * w, y: top ? -20 : Math.random() * h,
+        s: big ? 14 + z * 12 : 3 + z * 6, img: big ? crystal : dot,
+        vy: .35 + z * 1.1, ph: Math.random() * 6.28, amp: .3 + Math.random() * .8,
+        rot: Math.random() * 6.28, vr: (Math.random() - .5) * .02, a: .55 + z * .45, pushX: 0
+      };
+    };
+    const resize = () => {
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      w = innerWidth; h = innerHeight;
+      cv.width = w * dpr; cv.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const n = Math.round(Math.min(220, w * h / 7000));
+      while (flakes.length < n) flakes.push(make(false));
+      flakes.length = n;
+    };
+    resize();
+    addEventListener('resize', resize);
+
+    let px = -1e4, py = -1e4;
+    addEventListener('pointermove', e => { px = e.clientX; py = e.clientY; });
+
+    const btn = document.querySelector('.snow-btn');
+    let on = true;
+    try { on = localStorage.getItem('snow') !== 'off'; } catch {}
+    const set = v => {
+      on = v;
+      document.body.classList.toggle('no-snow', !on);
+      btn.setAttribute('aria-pressed', on);
+      try { localStorage.setItem('snow', on ? 'on' : 'off'); } catch {}
+      if (on && !running) { running = true; requestAnimationFrame(tick); }
+    };
+    btn.addEventListener('click', () => set(!on));
+
+    let t = 0, running = false;
+    const tick = () => {
+      if (!on) { running = false; return; }
+      running = true;
+      t += 1;
+      const wind = Math.sin(t / 400) * .6 + Math.sin(t / 97) * .2;
+      const fast = document.body.classList.contains('party') ? 2.2 : 1;
+      ctx.clearRect(0, 0, w, h);
+      for (const f of flakes) {
+        const dx = f.x - px, dy = f.y - py, d2 = dx * dx + dy * dy;
+        if (d2 < 8000) f.pushX += dx / Math.sqrt(d2 + 1) * .6; // shy away from the cursor
+        f.pushX *= .94;
+        f.y += f.vy * fast;
+        f.x += (wind + Math.sin(t / 60 + f.ph) * f.amp) * f.vy + f.pushX;
+        f.rot += f.vr;
+        if (f.y > h + 20) Object.assign(f, make(true));
+        if (f.x > w + 20) f.x = -20; else if (f.x < -20) f.x = w + 20;
+        ctx.globalAlpha = f.a;
+        ctx.save();
+        ctx.translate(f.x, f.y); ctx.rotate(f.rot);
+        ctx.drawImage(f.img, -f.s / 2, -f.s / 2, f.s, f.s);
+        ctx.restore();
+      }
+      requestAnimationFrame(tick);
+    };
+    set(on);
   })();
 
   // reveal on scroll
